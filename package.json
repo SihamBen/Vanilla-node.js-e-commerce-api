@@ -18,6 +18,7 @@
     "cors": "^2.8.5",
     "errorhandler": "^1.5.1",
     "finalhandler": "^1.1.2",
+    "formidable": "^1.2.2",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.11.11",
     "mongoose-currency": "^0.2.0",

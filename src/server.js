@@ -3,20 +3,22 @@ const morgan = require("morgan");
 const logger = morgan("combined");
 const finalhander = require("finalhandler");
 const mongoose=require("mongoose")
+
 const {MONGODB_URI}=require('./utils/secrets')
 const {
   getProducts,
   getProduct,
   createProduct,
 } = require("./controllers/productsController");
+const {addReview}=require('./controllers/reviewController')
 
 // Connect to MongoDB
 
-(() => {
+
   const connection = mongoose.connection;
   connection.on("connected", () => {
     console.log("Mongo Connection Established");
-  });
+    });
   connection.on("reconnected", () => {
     console.log("Mongo Connection Reestablished");
   });
@@ -38,7 +40,7 @@ const {
     await mongoose.connect(MONGODB_URI);
   };
   run().catch((error) => console.error(error));
-})();
+
 
 
 
@@ -56,6 +58,18 @@ const server = http.createServer((req, res) => {
             getProduct(req, res, id);
           } else if (req.url === "/api/products" && req.method === "POST") {
             createProduct(res, req);
+          } 
+          else if (req.url === "/api/reviews" && req.method === "POST") {
+            addReview(res, req);
+          } 
+          else if (req.url === "/api/reviews" && req.method === "GET") {
+            res.writeHead(200, {'Content-Type': 'text/html'});
+            res.write('<form action="reviews" method="post" enctype="multipart/form-data">');
+            res.write('<input type="file" name="filetoupload"><br>');
+            res.write('<input type="text" name="random"><br>');
+            res.write('<input type="submit">');
+            res.write('</form>');
+            return res.end();
           } else {
             res.statusCode = 404;
             res.writeHead(404, { "Content-Type": "text/json" });

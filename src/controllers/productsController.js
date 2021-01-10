@@ -1,11 +1,13 @@
 const Product = require("../models/productModel");
-// @desc get all products
+
+
 const headers = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "OPTIONS, POST, GET",
   "Access-Control-Max-Age": 2592000,
   "Content-Type": "text/json"
 };
+// @desc get all products
 async function getProducts(req, res) {
   try {
     const products = await Product.find({});
@@ -70,7 +72,7 @@ async function createProduct(req,res)
     catch(error)
     {console.log(error)}
 }
-// @desc updated product
+// @desc update a  product
 async function updateProduct(req,res,product)
 {
     try{
