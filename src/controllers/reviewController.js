@@ -1,56 +1,67 @@
 const formidable = require("formidable");
+const fileSystem = require("fs");
+const path = require("path");
 const Review = require("../models/reviewModel");
+const {
+  getAll,
+  getDocument,
+  filterDocuments,
+  deleteDocument,
+  updateDocument,
+} = require("./queries");
 
 const headers = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "OPTIONS, POST, GET",
   "Access-Control-Max-Age": 2592000,
-  "Content-Type": "text/json",
+  "Content-Type": "",
 };
 
 // @desc get all reviews
-async function getAllReviews(req, res) {
-  try {
-    const reviews = await review.find({});
-    res.statusCode = 200;
-    
-    res.writeHead(200,headers);
-
-    res.end(JSON.stringify(reviews));
-  } catch (error) {
-    console.log(error);
-  }
+function getAllReviews(req, res) {
+  headers["Content-Type"] = "application/json";
+  getAll(req, res, Review, headers);
 }
-// @desc get one review
-async function getReview(req, res, id) {
+// @desc get all reviews
+async function getReviewById(req, res, id) {
   if (!id) {
     return res.status(400).json({
-        error: {
-            status: 400,
-            message: "Bad request."
-        }
+      error: {
+        status: 400,
+        message: "Bad request.",
+      },
     });
-}
-  try {
-   
-  const review = await review.findById(id).exec();
-    if (!review) {
-        res.statusCode = 404;
-        res.writeHead(404,headers);
-        res.end(JSON.stringify({message:"review Not Found"}));
-    }
-    else {
-        res.statusCode = 200;
-        res.writeHead(200,headers);
-      res.end(JSON.stringify(review));
-        
-    }
-  } catch (error) {
-    console.log(error);
+  }
+  const data = await Review.findById(id).exec();
+  if (!data) {
+    res.statusCode = 404;
+    headers["Content-Type"] = "application/json";
+    res.writeHead(404, headers);
+    res.end(JSON.stringify({ message: "Not Found" }));
+  }
+try{
+  const { rating, comment, author, product } = data;
+  //let filePath = path.join(__dirname, data.reviewPictures[0]);
+  let filePath ="C:\\Users\\siham\\Desktop\\Projects\\E-commerce-vanilla-Nodejs-API\\src\\public\\images\\reviews\\picture1.jpg";
+  let stat = fileSystem.statSync(filePath);
+  let readStream = fileSystem.createReadStream(filePath);
+  headers["Content-Type"] = "multipart/form-data";
+  headers["Content-Length"] = stat.size;
+  res.writeHead(200, headers);
+
+  readStream.on("data", function (data) {
+    res.write(data);
+  });
+
+  readStream.on("end", function () {
+    res.end(JSON.stringify(rating, comment, author, product));
+  });}
+  catch(err){
+    console.log(err)
   }
 }
 
-// Add review 
+// Add review
 function addReview(res, req) {
   try {
     let uploadDir = "src\\public\\images\\reviews";
@@ -63,11 +74,11 @@ function addReview(res, req) {
         res.end();
       }
       try {
-        let reviewData = {};
-        reviewData = Object.assign(reviewData, fields);
-        reviewData["images"] = [];
+        const { rating, comment, author, product } = fields;
+        let reviewData = { rating, comment, author, product };
+        reviewData["reviewPictures"] = [];
         for (const file in files) {
-          reviewData["images"].push(file.path);
+          reviewData["reviewPictures"].push(files[file].path);
         }
         let newReview = new Review(reviewData);
         newReview = await newReview.save();
@@ -83,33 +94,9 @@ function addReview(res, req) {
   }
 }
 
-
 // @desc remove one review
-async function deleteReview(req, res, id) {
-  if (!id) {
-    return res.status(400).json({
-        error: {
-            status: 400,
-            message: "Bad request."
-        }
-    });
+function deleteReview(req, res, id) {
+  headers["Content-Type"] = "application/json";
+  deleteDocument(req, res, id, Review, headers);
 }
-  try {
-   
-  const review = await review.findByIdAndRemove(id).exec();
-    if (!review) {
-        res.statusCode = 404;
-        res.writeHead(404,headers);
-        res.end(JSON.stringify({message:"review Not Found"}));
-    }
-    else {
-        res.status(204)
-        res.writeHead(200,headers);
-      res.end('Review was removed');
-        
-    }
-  } catch (error) {
-    console.log(error);
-  }
-}
-module.exports = { addReview };
+module.exports = { addReview, getAllReviews, getReviewById, deleteReview };

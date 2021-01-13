@@ -14,19 +14,23 @@ const reviewSchema = new Schema(
       type: String,
       required: true
     },
-    image: [
-      {type: String},
-    ],
+    
     
     author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      type: String
+      // type: mongoose.Schema.Types.ObjectId,
+      // ref: 'User'
   },
     product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product'
-  }
+      type: String
+      // type: mongoose.Schema.Types.ObjectId,
+      // ref: 'Product'
   },
+  reviewPictures: [
+    {type: String},
+  ],
+  },
+ 
   {
     timestamps: true
   }
