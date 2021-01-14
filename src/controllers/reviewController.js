@@ -24,41 +24,8 @@ function getAllReviews(req, res) {
 }
 // @desc get all reviews
 async function getReviewById(req, res, id) {
-  if (!id) {
-    return res.status(400).json({
-      error: {
-        status: 400,
-        message: "Bad request.",
-      },
-    });
-  }
-  const data = await Review.findById(id).exec();
-  if (!data) {
-    res.statusCode = 404;
-    headers["Content-Type"] = "application/json";
-    res.writeHead(404, headers);
-    res.end(JSON.stringify({ message: "Not Found" }));
-  }
-try{
-  const { rating, comment, author, product } = data;
-  //let filePath = path.join(__dirname, data.reviewPictures[0]);
-  let filePath ="C:\\Users\\siham\\Desktop\\Projects\\E-commerce-vanilla-Nodejs-API\\src\\public\\images\\reviews\\picture1.jpg";
-  let stat = fileSystem.statSync(filePath);
-  let readStream = fileSystem.createReadStream(filePath);
-  headers["Content-Type"] = "multipart/form-data";
-  headers["Content-Length"] = stat.size;
-  res.writeHead(200, headers);
-
-  readStream.on("data", function (data) {
-    res.write(data);
-  });
-
-  readStream.on("end", function () {
-    res.end(JSON.stringify(rating, comment, author, product));
-  });}
-  catch(err){
-    console.log(err)
-  }
+  headers["Content-Type"] = "application/json";
+  getDocument(req, res, id, Review, headers);
 }
 
 // Add review
@@ -77,8 +44,10 @@ function addReview(res, req) {
         const { rating, comment, author, product } = fields;
         let reviewData = { rating, comment, author, product };
         reviewData["reviewPictures"] = [];
+        let route = "http://localhost:3000/api/reviews/pictures/";
         for (const file in files) {
-          reviewData["reviewPictures"].push(files[file].path);
+          let filename = files[file].path.split("\\").pop();
+          reviewData["reviewPictures"].push(route + filename);
         }
         let newReview = new Review(reviewData);
         newReview = await newReview.save();
