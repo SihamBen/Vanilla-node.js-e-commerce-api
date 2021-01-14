@@ -16,6 +16,7 @@ const {
   getReviewById,
   deleteReview,
 } = require("./controllers/reviewController");
+const { getReviewPicture } = require("./controllers/reviewPictureController");
 
 // Connect to MongoDB
 
@@ -64,7 +65,14 @@ const server = http.createServer((req, res) => {
       addReview(res, req);
     } else if (req.url === "/api/reviews" && req.method === "GET") {
       getAllReviews(req, res);
-    } else if (
+    } 
+    else if (
+      req.url.match(/\/api\/reviews\/pictures\/[a-zA-Z0-9]+/) &&
+      req.method === "GET"
+    ) {
+      const id = req.url.split("/")[4];
+      getReviewPicture(req, res, id);
+    }else if (
       req.url.match(/\/api\/reviews\/[a-zA-Z0-9]+/) &&
       req.method === "GET"
     ) {
@@ -76,7 +84,8 @@ const server = http.createServer((req, res) => {
     ) {
       const id = req.url.split("/")[3];
       deleteReview(req, res, id);
-    } else {
+    }
+     else {
       res.statusCode = 404;
       res.writeHead(404, { "Content-Type": "text/json" });
       res.end(JSON.stringify({ message: "Route not found" }));
