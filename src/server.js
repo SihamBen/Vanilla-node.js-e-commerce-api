@@ -6,9 +6,10 @@ const mongoose = require("mongoose");
 
 const { MONGODB_URI } = require("./utils/secrets");
 const {
-  getProducts,
-  getProduct,
-  createProduct,
+  addProduct,
+  getAllProducts,
+  getProductById,
+  deleteProduct,
 } = require("./controllers/productsController");
 const {
   addReview,
@@ -17,6 +18,7 @@ const {
   deleteReview,
 } = require("./controllers/reviewController");
 const { getReviewPicture } = require("./controllers/reviewPictureController");
+const { getProductPicture } = require("./controllers/productPictureController");
 
 // Connect to MongoDB
 
@@ -52,27 +54,38 @@ const server = http.createServer((req, res) => {
     if (err) return done(err);
 
     if (req.url === "/api/products" && req.method === "GET") {
-      getProducts(req, res);
+      getAllProducts(req, res);
     } else if (
-      req.url.match(/\/api\/products\/[0-9]+/) &&
+      req.url.match(/\/api\/products\/pictures\/[a-zA-Z0-9]+/) &&
+      req.method === "GET"
+    ) {
+      const id = req.url.split("/")[4];
+      getProductPicture(req, res, id);
+    } else if (
+      req.url.match(/\/api\/products\/[a-zA-Z0-9]+/) &&
       req.method === "GET"
     ) {
       const id = req.url.split("/")[3];
-      getProduct(req, res, id);
+      getProductById(req, res, id);
+    } else if (
+      req.url.match(/\/api\/products\/[a-zA-Z0-9]+/) &&
+      req.method === "DELETE"
+    ) {
+      const id = req.url.split("/")[3];
+      deleteProduct(req, res, id);
     } else if (req.url === "/api/products" && req.method === "POST") {
-      createProduct(res, req);
+      addProduct(res, req);
     } else if (req.url === "/api/reviews" && req.method === "POST") {
       addReview(res, req);
     } else if (req.url === "/api/reviews" && req.method === "GET") {
       getAllReviews(req, res);
-    } 
-    else if (
+    } else if (
       req.url.match(/\/api\/reviews\/pictures\/[a-zA-Z0-9]+/) &&
       req.method === "GET"
     ) {
       const id = req.url.split("/")[4];
       getReviewPicture(req, res, id);
-    }else if (
+    } else if (
       req.url.match(/\/api\/reviews\/[a-zA-Z0-9]+/) &&
       req.method === "GET"
     ) {
@@ -84,8 +97,7 @@ const server = http.createServer((req, res) => {
     ) {
       const id = req.url.split("/")[3];
       deleteReview(req, res, id);
-    }
-     else {
+    } else {
       res.statusCode = 404;
       res.writeHead(404, { "Content-Type": "text/json" });
       res.end(JSON.stringify({ message: "Route not found" }));

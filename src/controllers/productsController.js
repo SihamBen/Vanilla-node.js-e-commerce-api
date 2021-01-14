@@ -1,100 +1,69 @@
+const formidable = require("formidable");
 const Product = require("../models/productModel");
-
+const {
+  getAll,
+  getDocument,
+  filterDocuments,
+  deleteDocument,
+  updateDocument,
+} = require("./queries");
 
 const headers = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "OPTIONS, POST, GET",
   "Access-Control-Max-Age": 2592000,
-  "Content-Type": "text/json"
+  "Content-Type": "",
 };
-// @desc get all products
-async function getProducts(req, res) {
-  try {
-    const products = await Product.find({});
-    res.statusCode = 200;
-    
-    res.writeHead(200,headers);
 
-    res.end(JSON.stringify(products));
-  } catch (error) {
-    console.log(error);
-  }
+// @desc get all reviews
+function getAllProducts(req, res) {
+  headers["Content-Type"] = "application/json";
+  getAll(req, res, Product, headers);
 }
-// @desc get one product
+// @desc get all reviews
+async function getProductById(req, res, id) {
+  headers["Content-Type"] = "application/json";
+  getDocument(req, res, id, Product, headers);
+}
 
-async function getProduct(req, res, id) {
-
-  if (!id) {
-    return res.status(400).json({
-        error: {
-            status: 400,
-            message: "Bad request."
+// Add review
+function addProduct(res, req) {
+  try {
+    let uploadDir = "src\\public\\images\\products";
+    let form = formidable({ multiples: true, uploadDir, keepExtensions: true });
+    form.parse(req, async function (err, fields, files) {
+      if (err) throw err;
+      if (fields === null) {
+        res.statusCode = 400;
+        res.write("Bad Request");
+        res.end();
+      }
+      try {
+        const { productName, category, price, description } = fields;
+        let productData = { productName, category, price, description };
+        productData["productPictures"] = [];
+        let route = "http://localhost:3000/api/products/pictures/";
+        for (const file in files) {
+          let filename = files[file].path.split("\\").pop();
+          productData["productPictures"].push(route + filename);
         }
-    });
-}
-  try {
-   
-  const product = await Product.findById(id).exec();
-    if (!product) {
-        res.statusCode = 404;
-        res.writeHead(404,headers);
-        res.end(JSON.stringify({message:"Product Not Found"}));
-    }
-    else {
-        res.statusCode = 200;
-        res.writeHead(200,headers);
-      res.end(JSON.stringify(product));
-        
-    }
-  } catch (error) {
-    console.log(error);
-  }
-}
-// @desc add a  product
-async function createProduct(req,res)
-{
-    try{
-      const body=""
-      req.on('data',(chunk)=>{
-              body+=chunk.toString()
-      })
-      req.on('end',async ()=>{
-        const {productName,category,image,description,price,reviews}=JSON.parse(body)
-        const product={productName,category,image,description,price,reviews}
-        let newProduct = new Product(product);
+        let newProduct = new Product(productData);
         newProduct = await newProduct.save();
         res.statusCode = 201;
-        res.writeHead(201, headers);
-        res.end(JSON.stringify(newProduct));
-      })
-      
-    }
-    catch(error)
-    {console.log(error)}
-}
-// @desc update a  product
-async function updateProduct(req,res,product)
-{
-    try{
-        const products=await Products.updateProduct(products)
-        res.statusCode = 200;
-      res.setHeader("Content-Type", "text/json");
-      res.end(JSON.stringify(products));
-    }
-    catch(error)
-    {console.log(error)}
-}
-// @desc delete a product 
-async function deleteProduct(req, res, id) {
-    try {
-      const products = await Products.deleteProduct(id);
-    
-        res.statusCode = 200;
-        res.setHeader("Content-Type", "text/json");
-        res.end(JSON.stringify(products));
-     
-    } catch (error) {
-      console.log(error);
-    }
+        res.write(JSON.stringify(newProduct));
+        res.end();
+      } catch (err) {
+        console.log(err);
+      }
+    });
+  } catch (err) {
+    console.log(err);
   }
-module.exports = { getProducts, getProduct,createProduct};
+}
+
+// @desc remove one review
+function deleteProduct(req, res, id) {
+  headers["Content-Type"] = "application/json";
+  deleteDocument(req, res, id, Product, headers);
+}
+module.exports = { addProduct, getAllProducts, getProductById, deleteProduct };

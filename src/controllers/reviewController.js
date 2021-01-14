@@ -1,6 +1,4 @@
 const formidable = require("formidable");
-const fileSystem = require("fs");
-const path = require("path");
 const Review = require("../models/reviewModel");
 const {
   getAll,

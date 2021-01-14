@@ -17,10 +17,10 @@ const productSchema = new Schema(
       type: String,
       required: true
     },
-    image: {
-      type: String,
-      required: true
-    },
+    productPictures: [
+     { type: String,
+      required: true}
+    ],
     
     reviews: [{ type: Schema.Types.ObjectId, ref: 'Review' }]
   },
