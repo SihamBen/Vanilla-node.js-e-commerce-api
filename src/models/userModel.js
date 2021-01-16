@@ -1,8 +1,6 @@
-import { Schema,model, Error } from "mongoose";
-import bcrypt from "bcryptjs";
+const { Schema, model } = require("mongoose");
 const JWT = require("jsonwebtoken");
-
-
+const bcrypt = require("bcryptjs");
 
 const userSchema = new Schema(
   {
@@ -39,12 +37,12 @@ userSchema.pre("save", function (next) {
   next();
 });
 
-userSchema.methods.validPassword = function (inputedPassword: string) {
+userSchema.methods.validPassword = function (inputedPassword) {
   return bcrypt.compareSync(inputedPassword, this.password);
 };
 
 userSchema.methods.getJWT = function () {
-  return JWT.sign({ userId: this._id }, process.env.ACCESS_TOKEN_SIGNATURE_KEY);
+  return JWT.sign({ userId }, process.env.ACCESS_TOKEN_SIGNATURE_KEY);
 };
 
 userSchema.methods.hashPassword = function () {

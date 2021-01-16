@@ -3,6 +3,13 @@ const morgan = require("morgan");
 const logger = morgan("combined");
 const finalhandler = require("finalhandler");
 const mongoose = require("mongoose");
+const {
+  createUser,
+  getAllUsers,
+  getUserById,
+  deleteUser,
+  updateUser
+} = require("./controllers/userController");
 
 const { MONGODB_URI } = require("./utils/secrets");
 const {
@@ -75,7 +82,35 @@ const server = http.createServer((req, res) => {
       deleteProduct(req, res, id);
     } else if (req.url === "/api/products" && req.method === "POST") {
       addProduct(res, req);
-    } else if (req.url === "/api/reviews" && req.method === "POST") {
+    } else if (req.url === "/api/users" && req.method === "GET") {
+      getAllUsers(req, res);
+    } 
+    
+    else if (req.url === "/api/users" && req.method === "POST") {
+      createUser(req, res);
+    }
+    else if (
+      req.url.match(/\/api\/users\/[a-zA-Z0-9]+/) &&
+      req.method === "GET"
+    ) {
+      const id = req.url.split("/")[3];
+      getUserById(req, res, id);
+    }
+    else if (
+      req.url.match(/\/api\/users\/[a-zA-Z0-9]+/) &&
+      req.method === "PUT"
+    ) {
+      const id = req.url.split("/")[3];
+      updateUser(req, res, id);
+    } else if (
+      req.url.match(/\/api\/users\/[a-zA-Z0-9]+/) &&
+      req.method === "DELETE"
+    ) {
+      const id = req.url.split("/")[3];
+      deleteUser(req, res, id);
+    }  
+    
+    else if (req.url === "/api/reviews" && req.method === "POST") {
       addReview(res, req);
     } else if (req.url === "/api/reviews" && req.method === "GET") {
       getAllReviews(req, res);
