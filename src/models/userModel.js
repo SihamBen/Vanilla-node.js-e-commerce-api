@@ -42,7 +42,7 @@ userSchema.methods.validPassword = function (inputedPassword) {
 };
 
 userSchema.methods.getJWT = function () {
-  return JWT.sign({ userId }, process.env.ACCESS_TOKEN_SIGNATURE_KEY);
+  return JWT.sign({ userId : this._id}, process.env.ACCESS_TOKEN_SIGNATURE_KEY);
 };
 
 userSchema.methods.hashPassword = function () {

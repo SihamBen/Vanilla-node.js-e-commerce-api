@@ -23,11 +23,11 @@ async function getDocument(req, res, id, model, headers) {
   try {
     const data = await model.findById(id).exec();
     if (!data) {
-      res.statusCode = 404;
+
       res.writeHead(404, headers);
       res.end(JSON.stringify({ message: "Not Found" }));
     } else {
-      res.statusCode = 200;
+      
       res.writeHead(200, headers);
       res.end(JSON.stringify(data));
     }

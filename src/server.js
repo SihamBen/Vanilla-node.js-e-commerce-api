@@ -8,9 +8,9 @@ const {
   getAllUsers,
   getUserById,
   deleteUser,
-  updateUser
+  updateUser,
 } = require("./controllers/userController");
-
+const { register ,login,me} = require("./controllers/authController");
 const { MONGODB_URI } = require("./utils/secrets");
 const {
   addProduct,
@@ -84,19 +84,15 @@ const server = http.createServer((req, res) => {
       addProduct(res, req);
     } else if (req.url === "/api/users" && req.method === "GET") {
       getAllUsers(req, res);
-    } 
-    
-    else if (req.url === "/api/users" && req.method === "POST") {
+    } else if (req.url === "/api/users" && req.method === "POST") {
       createUser(req, res);
-    }
-    else if (
+    } else if (
       req.url.match(/\/api\/users\/[a-zA-Z0-9]+/) &&
       req.method === "GET"
     ) {
       const id = req.url.split("/")[3];
       getUserById(req, res, id);
-    }
-    else if (
+    } else if (
       req.url.match(/\/api\/users\/[a-zA-Z0-9]+/) &&
       req.method === "PUT"
     ) {
@@ -108,9 +104,7 @@ const server = http.createServer((req, res) => {
     ) {
       const id = req.url.split("/")[3];
       deleteUser(req, res, id);
-    }  
-    
-    else if (req.url === "/api/reviews" && req.method === "POST") {
+    } else if (req.url === "/api/reviews" && req.method === "POST") {
       addReview(res, req);
     } else if (req.url === "/api/reviews" && req.method === "GET") {
       getAllReviews(req, res);
@@ -132,6 +126,14 @@ const server = http.createServer((req, res) => {
     ) {
       const id = req.url.split("/")[3];
       deleteReview(req, res, id);
+    } else if (req.url === "/api/auth/register" && req.method === "POST") {
+      register(req, res);
+    } 
+    else if (req.url === "/api/auth/login" && req.method === "POST") {
+      login(req, res);
+    } 
+    else if (req.url === "/api/auth/me" && req.method === "GET") {
+      me(req, res);
     } else {
       res.statusCode = 404;
       res.writeHead(404, { "Content-Type": "text/json" });
